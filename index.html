@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Good Morning, Steve — Motorola Solutions Command Center</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f5f7;color:#1d1d1f;line-height:1.5}
+.shell{max-width:1180px;margin:0 auto;padding:32px 24px 64px}
+.greeting{padding:40px 0 32px}
+.greeting .hello{font-size:36px;font-weight:700;letter-spacing:-.025em;line-height:1.15}
+.greeting .date{font-size:15px;color:#86868b;margin-top:4px;font-weight:400}
+.greeting .powered{display:inline-flex;align-items:center;gap:6px;background:#1d1d1f;color:#fff;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 14px;border-radius:20px;margin-top:14px}
+.greeting .powered .dot{width:6px;height:6px;border-radius:50%;background:#34c759;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:32px}
+.kpi-card{background:#fff;border-radius:14px;padding:20px 22px;box-shadow:0 1px 3px rgba(0,0,0,0.08),0 8px 24px rgba(0,0,0,0.06);transition:transform .2s ease,box-shadow .2s ease}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 2px 8px rgba(0,0,0,0.1),0 16px 36px rgba(0,0,0,0.08)}
+.kpi-card .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#86868b;font-weight:600}
+.kpi-card .val{font-size:26px;font-weight:700;margin-top:3px;letter-spacing:-.02em}
+.kpi-card .delta{font-size:12px;margin-top:2px;font-weight:500}
+.up{color:#34c759}.down{color:#d32f2f}.flat{color:#86868b}
+.section{margin-top:32px}
+.section-hdr{font-size:20px;font-weight:700;margin-bottom:16px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.card{background:#fff;border-radius:14px;padding:26px;box-shadow:0 1px 3px rgba(0,0,0,0.08),0 8px 24px rgba(0,0,0,0.06);margin-bottom:18px}
+.card h3{font-size:16px;font-weight:700;margin-bottom:12px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.status-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f0f0f2}
+.status-row:last-child{border-bottom:none}
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.status-dot.green{background:#34c759}.status-dot.amber{background:#ff9f0a}.status-dot.red{background:#ff3b30}.status-dot.blue{background:#005293}
+.status-label{font-size:14px;font-weight:500;flex:1}
+.status-meta{font-size:12px;color:#86868b;text-align:right}
+.tag{display:inline-block;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.04em}
+.tag-green{background:#e8f5e9;color:#2e7d32}.tag-amber{background:#fff3e0;color:#e65100}.tag-red{background:#fde8e8;color:#d32f2f}.tag-blue{background:#e3f2fd;color:#1565c0}.tag-gray{background:#f0f0f2;color:#6e6e73}
+.ask-bar{background:#fff;border-radius:14px;padding:20px 26px;box-shadow:0 1px 3px rgba(0,0,0,0.08),0 8px 24px rgba(0,0,0,0.06);display:flex;align-items:center;gap:14px;margin-bottom:32px;cursor:pointer;transition:box-shadow .2s ease}
+.ask-bar:hover{box-shadow:0 2px 10px rgba(0,0,0,0.1),0 18px 40px rgba(0,0,0,0.08)}
+.ask-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#005293,#0072CE);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0}
+.ask-text{flex:1}
+.ask-text .prompt{font-size:15px;color:#86868b;font-weight:400}
+.ask-text .hint{font-size:12px;color:#d2d2d7;margin-top:2px}
+.chart-box-sm{height:240px;width:100%}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-weight:600;padding:10px 12px;border-bottom:2px solid #e8e8ed;color:#1d1d1f;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+td{padding:10px 12px;border-bottom:1px solid #f0f0f2;color:#333}
+tr:hover td{background:#fafafa}
+.agenda-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid #f0f0f2}
+.agenda-item:last-child{border-bottom:none}
+.agenda-time{font-size:13px;font-weight:600;color:#005293;white-space:nowrap;min-width:70px;padding-top:1px}
+.agenda-detail .agenda-title{font-size:14px;font-weight:600;color:#1d1d1f}
+.agenda-detail .agenda-meta{font-size:12px;color:#86868b;margin-top:2px}
+.insight{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f2}
+.insight:last-child{border-bottom:none}
+.insight .ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.insight .txt{font-size:13px;color:#333;line-height:1.5}
+.insight .txt strong{color:#1d1d1f}
+.prog-wrap{margin-top:8px}
+.prog-label{display:flex;justify-content:space-between;font-size:12px;color:#6e6e73;margin-bottom:4px}
+.prog-bar{height:6px;border-radius:3px;background:#f0f0f2;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.region-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.region-card{background:#fafafa;border-radius:10px;padding:14px 16px;text-align:center;transition:background .2s ease}
+.region-card:hover{background:#f0f0f2}
+.region-card .r-name{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#86868b;font-weight:600}
+.region-card .r-val{font-size:22px;font-weight:700;margin-top:4px;letter-spacing:-.02em}
+.region-card .r-sub{font-size:11px;color:#6e6e73;margin-top:2px}
+.footer-note{text-align:center;font-size:11px;color:#86868b;margin-top:40px;padding-top:18px;border-top:1px solid #e8e8ed}
+@media screen and (max-width:900px){.kpi-strip{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}.region-grid{grid-template-columns:repeat(2,1fr)}}
+@media screen and (max-width:600px){.kpi-strip{grid-template-columns:1fr}.greeting .hello{font-size:26px}}
+@media print{@page{margin:0;size:8.5in 999in}body{margin:0;padding:.4in .6in;background:#fff;print-color-adjust:exact;-webkit-print-color-adjust:exact}.shell{max-width:100%!important;width:100%!important}.ask-bar{display:none!important}[class*="card"]{padding:18px!important;box-shadow:none!important;border:1px solid rgba(0,0,0,.08)}[class*="grid"],[class*="row"]{gap:10px!important;margin-bottom:20px!important}[class*="chart"]{height:240px!important}*,*::before,*::after{animation:none!important;transition:none!important}button,[role="button"]{display:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="greeting">
+    <div class="hello">Good morning, Steve.</div>
+    <div class="date">Tuesday, May 5 2026 · Chicago, IL · 62°F partly cloudy — Motorola Solutions Managed & Support Services operational globally</div>
+    <div class="powered"><span class="dot"></span> Powered by Glean Work AI</div>
+  </div>
+  <div class="ask-bar">
+    <div class="ask-icon">✦</div>
+    <div class="ask-text">
+      <div class="prompt">Ask me anything across Motorola Solutions Managed & Support Services…</div>
+      <div class="hint">"What's the current NOC P1 backlog and MTTR trend this week?" · "Show me SLA compliance by customer contract for Q2" · "Which ASTRO network accounts are at risk of missing uptime SLA this quarter?"</div>
+    </div>
+  </div>
+  <div class="kpi-strip">
+    <div class="kpi-card"><div class="lbl">Managed Network Uptime — MTD</div><div class="val" style="color:#34c759">99.91%</div><div class="delta flat">— vs 99.95% SLA · 4 minor incidents resolved</div></div>
+    <div class="kpi-card"><div class="lbl">Customer SLA Compliance (Q2 YTD)</div><div class="val" style="color:#005293">97.8%</div><div class="delta up">↑ 1.6pts vs Q1 · Federal + State/Local leading</div></div>
+    <div class="kpi-card"><div class="lbl">Open Incident Backlog</div><div class="val">186</div><div class="delta up">↓ 14% vs last month · 8 P1s resolved this week</div></div>
+    <div class="kpi-card"><div class="lbl">ActiveEye MDR — Threats Blocked (MTD)</div><div class="val" style="color:#34c759">2,847</div><div class="delta up">↑ 12% vs April · 0 critical breaches MTD</div></div>
+    <div class="kpi-card"><div class="lbl">AI Assist Suite — Field Tech Adoption</div><div class="val" style="color:#005293">68%</div><div class="delta up">↑ 11% MoM · 550+ technicians · Dispatch AI live</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h3>📡 Managed & Support Services — Live Status</h3>
+      <div class="status-row"><div class="status-dot green"></div><div class="status-label">NOC Operations — Mission-Critical LMR/ASTRO Networks</div><div class="status-meta">99.91% uptime MTD · 120 NOC operators active</div></div>
+      <div class="status-row"><div class="status-dot green"></div><div class="status-label">ActiveEye MDR — Cybersecurity Operations</div><div class="status-meta">2,847 threats blocked MTD · 0 critical breaches · Clean</div></div>
+      <div class="status-row"><div class="status-dot green"></div><div class="status-label">Field Service Operations — 550+ Technicians</div><div class="status-meta">AI Assist dispatch live · 97.8% SLA · Response time down 18%</div></div>
+      <div class="status-row"><div class="status-dot green"></div><div class="status-label">Device & Radio Fleet Management</div><div class="status-meta">84K+ devices under management · Firmware sync stable</div></div>
+      <div class="status-row"><div class="status-dot amber"></div><div class="status-label">ASTRO Network — Southeast Region (3 Accounts)</div><div class="status-meta">Capacity threshold at 88% · Upgrade review scheduled</div></div>
+      <div class="status-row"><div class="status-dot green"></div><div class="status-label">Service Contract Renewals — $15.7B Backlog</div><div class="status-meta">94% retention rate · 12 contracts up for renewal Q3</div></div>
+      <div class="status-row"><div class="status-dot amber"></div><div class="status-label">Service Knowledge Repositories (SOPs / Runbooks)</div><div class="status-meta">Fragmented across SharePoint/Teams/email · Search gap flagged</div></div>
+      <div class="status-row"><div class="status-dot green"></div><div class="status-label">Federal / Public Safety Segment — Priority Accounts</div><div class="status-meta">FirstNet aligned · P25 Phase II on track · 0 SLA breaches</div></div>
+    </div>
+    <div class="card">
+      <h3>📅 Your Day — May 5</h3>
+      <div class="agenda-item"><div class="agenda-time">7:30a</div><div class="agenda-detail"><div class="agenda-title">NOC Daily Operations Brief — P1 Backlog Review</div><div class="agenda-meta">NOC leads · Active incidents · Chicago + remote ops centers</div></div></div>
+      <div class="agenda-item"><div class="agenda-time">9:00a</div><div class="agenda-detail"><div class="agenda-title">ASTRO Southeast Capacity Review — Upgrade Authorization</div><div class="agenda-meta">Network Ops + Field Services · 3 accounts at risk · SLA gate</div></div></div>
+      <div class="agenda-item"><div class="agenda-time">10:30a</div><div class="agenda-detail"><div class="agenda-title">Q2 SLA Scorecard — Customer Success Review</div><div class="agenda-meta">Customer Success leads · Contract performance · Renewal pipeline</div></div></div>
+      <div class="agenda-item"><div class="agenda-time">1:00p</div><div class="agenda-detail"><div class="agenda-title">Glean AI Platform — Managed Services Knowledge Demo</div><div class="agenda-meta">Kelli McIvor (Glean) · Field ops + NOC leads · Teams</div></div></div>
+      <div class="agenda-item"><div class="agenda-time">2:30p</div><div class="agenda-detail"><div class="agenda-title">ActiveEye MDR Q2 Threat Landscape Brief</div><div class="agenda-meta">CISO alignment · Public safety cyber posture · Confidential</div></div></div>
+      <div class="agenda-item"><div class="agenda-time">4:00p</div><div class="agenda-detail"><div class="agenda-title">Managed Services All-Hands — Q2 Priorities</div><div class="agenda-meta">Full MSS org · AI Assist rollout + contract renewal strategy</div></div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-hdr">📊 Managed Services Operations Performance</div>
+    <div class="grid-2">
+      <div class="card"><h3>Incident Volume by Category — Last 12 Weeks</h3><div id="latencyChart" class="chart-box-sm"></div></div>
+      <div class="card"><h3>Service Revenue by Contract Type — FY26 ($M)</h3><div id="bandwidthChart" class="chart-box-sm"></div></div>
+    </div>
+    <div class="card">
+      <h3>Regional & Segment Coverage Summary</h3>
+      <div class="region-grid">
+        <div class="region-card"><div class="r-name">Americas</div><div class="r-val" style="color:#005293">99.93%</div><div class="r-sub">Uptime MTD · Chicago NOC primary</div></div>
+        <div class="region-card"><div class="r-name">Federal / Gov</div><div class="r-val" style="color:#34c759">99.97%</div><div class="r-sub">P25 Phase II · FirstNet · 0 SLA breaches</div></div>
+        <div class="region-card"><div class="r-name">EMEA</div><div class="r-val" style="color:#34c759">99.88%</div><div class="r-sub">UK + EU public safety networks stable</div></div>
+        <div class="region-card"><div class="r-name">APAC</div><div class="r-val" style="color:#ff9f0a">99.71%</div><div class="r-sub">2 accounts flagged · Capacity review open</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><h3>🧭 Managed Services Maturity — MSS Operations Posture</h3><div id="securityRadar" class="chart-box-sm"></div></div>
+    <div class="card"><h3>🖥️ Managed Network Uptime — Last 9 Quarters</h3><div id="revenueChart" class="chart-box-sm"></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><h3>⚠️ Incident & Risk Signals — Last 30 Days</h3><div id="threatChart" class="chart-box-sm"></div></div>
+    <div class="card">
+      <h3>🤖 MSS Program & AI Automation Pipeline</h3>
+      <table><thead><tr><th>Initiative</th><th>Owner</th><th>Phase</th><th>Status</th></tr></thead><tbody>
+        <tr><td>ASTRO Southeast Capacity Upgrade</td><td>Steve Andrejek</td><td>Auth</td><td><span class="tag tag-amber">At Risk</span></td></tr>
+        <tr><td>AI Assist Suite — Field Tech Rollout</td><td>Field Ops</td><td>Scale-up</td><td><span class="tag tag-green">On Track</span></td></tr>
+        <tr><td>Glean AI Knowledge Search (MSS)</td><td>MSS Ops</td><td>Evaluation</td><td><span class="tag tag-blue">Active</span></td></tr>
+        <tr><td>ActiveEye MDR — Autonomous Response</td><td>Cyber Ops</td><td>Pilot</td><td><span class="tag tag-green">On Track</span></td></tr>
+        <tr><td>Contract Renewal Automation (Q3 Pipeline)</td><td>Customer Success</td><td>Build</td><td><span class="tag tag-amber">Review</span></td></tr>
+        <tr><td>Runbook Digitization — NOC + Field Ops</td><td>NOC / Field IT</td><td>Scale-up</td><td><span class="tag tag-amber">Behind</span></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h3>🏁 MSS Program Tracker — FY26 Priorities</h3>
+      <div style="display:flex;gap:24px;margin-bottom:16px">
+        <div style="text-align:center;flex:1"><div style="font-size:28px;font-weight:700;color:#005293">$15.7B</div><div style="font-size:11px;color:#86868b;margin-top:2px">Managed Services Backlog</div></div>
+        <div style="text-align:center;flex:1"><div style="font-size:28px;font-weight:700;color:#34c759">99.91%</div><div style="font-size:11px;color:#86868b;margin-top:2px">Global Network Uptime MTD</div></div>
+        <div style="text-align:center;flex:1"><div style="font-size:28px;font-weight:700;color:#ff9f0a">94%</div><div style="font-size:11px;color:#86868b;margin-top:2px">Contract Renewal Retention</div></div>
+      </div>
+      <div class="prog-wrap"><div class="prog-label"><span>AI Assist Suite — Field Tech Adoption (80% target)</span><span>68%</span></div><div class="prog-bar"><div class="prog-fill" style="width:68%;background:#005293"></div></div></div>
+      <div class="prog-wrap" style="margin-top:10px"><div class="prog-label"><span>ActiveEye MDR Autonomous Response Rollout</span><span>54%</span></div><div class="prog-bar"><div class="prog-fill" style="width:54%;background:#34c759"></div></div></div>
+      <div class="prog-wrap" style="margin-top:10px"><div class="prog-label"><span>ASTRO Network Capacity Upgrades (FY26 plan)</span><span>61%</span></div><div class="prog-bar"><div class="prog-fill" style="width:61%;background:#ff9f0a"></div></div></div>
+      <div class="prog-wrap" style="margin-top:10px"><div class="prog-label"><span>Runbook Digitization — NOC + Field Coverage</span><span>41%</span></div><div class="prog-bar"><div class="prog-fill" style="width:41%;background:#d2d2d7"></div></div></div>
+    </div>
+    <div class="card"><h3>💡 AI Assist — Field Tech Dispatch Automation Ramp</h3><div id="deflectionChart" class="chart-box-sm"></div></div>
+  </div>
+  <div class="section">
+    <div class="section-hdr">💰 Service Cost & Revenue Management — FY26 View</div>
+    <div class="grid-2">
+      <div class="card"><h3>Managed Services Revenue by Segment — Quarterly Trend ($M)</h3><div id="cloudCostChart" class="chart-box-sm"></div></div>
+      <div class="card"><h3>MSS Budget vs. Actual — FY26 by Quarter ($M)</h3><div id="budgetActualChart" class="chart-box-sm"></div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-hdr">✦ AI-Surfaced Insights — Things You Should Know</div>
+    <div class="card">
+      <div class="insight"><div class="ico" style="background:#fff3e0">🟡</div><div class="txt"><strong>ASTRO Southeast network capacity at 88% — upgrade authorization needed today</strong> — Three public safety accounts in the Southeast region are approaching the bandwidth ceiling. At current growth rates, the threshold will be breached within 6 weeks, putting 99.95% SLA commitments at risk. <em>Your 9:00a review is the critical authorization moment — come with the upgrade scope, cost, and customer communication plan ready.</em></div></div>
+      <div class="insight"><div class="ico" style="background:#e8f5e9">🟢</div><div class="txt"><strong>AI Assist Suite at 68% field tech adoption — response time down 18% vs FY25</strong> — Dispatch automation is the top-cited productivity gain among technicians. Predictive maintenance alerts have reduced unplanned ASTRO outages by 22% at pilot accounts. The trajectory puts full adoption (80% target) within reach by Q3. <em>Use today's all-hands to push the final adoption sprint — frame it as a customer SLA win, not an internal mandate.</em></div></div>
+      <div class="insight"><div class="ico" style="background:#e3f2fd">💡</div><div class="txt"><strong>Glean AI platform demo today at 1:00p — service knowledge fragmentation is the anchor use case</strong> — Your NOC operators and field technicians spend 5+ hours per week hunting for past incident resolutions, network configuration docs, and customer-specific SOPs scattered across SharePoint, Teams, and email. When a P1 hits on a mission-critical public safety network, your team is searching instead of resolving. Glean's AI search surfaces the right runbook, past incident history, and escalation contacts in seconds. <em>This directly maps to your MTTR reduction goal and AI Assist automation roadmap.</em></div></div>
+      <div class="insight"><div class="ico" style="background:#e8f5e9">✅</div><div class="txt"><strong>ActiveEye MDR blocking 2,847 threats MTD — autonomous response pilot delivering</strong> — Zero critical breaches across all managed public safety networks this month. The autonomous response pilot is resolving 61% of low/medium threats without human escalation, freeing your cyber analysts for high-value threat hunting. This is a direct competitive differentiator in contract renewal conversations — especially with federal and state/local accounts.</div></div>
+      <div class="insight"><div class="ico" style="background:#fde8e8">🔴</div><div class="txt"><strong>Runbook knowledge fragmentation is a compounding ops risk — especially at shift handoffs</strong> — When NOC operators rotate shifts or senior field technicians retire, critical resolution patterns are lost. The runbook digitization program is only at 41% coverage — and the NOC accounts without digital runbooks account for 67% of repeat P2/P3 incidents. <em>Today's Glean demo is the fastest path to closing this gap before it becomes a P1 SLA breach.</em></div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-hdr">👥 Leadership & Team Signals</div>
+    <div class="card">
+      <table><thead><tr><th>Person</th><th>Role</th><th>Top Item Today</th><th>Needs You</th></tr></thead><tbody>
+        <tr><td><strong>Greg Brown</strong></td><td>Chairman & CEO, Motorola Solutions</td><td>Q2 earnings prep · Managed services backlog narrative</td><td><span class="tag tag-blue">FYI</span></td></tr>
+        <tr><td><strong>Jason Winkler</strong></td><td>EVP & CFO</td><td>MSS margin targets · Cost per incident trending review</td><td><span class="tag tag-blue">Review</span></td></tr>
+        <tr><td><strong>John Zidar</strong></td><td>SVP, North America Sales</td><td>Contract renewal pipeline · Q3 upsell opportunities</td><td><span class="tag tag-amber">Action</span></td></tr>
+        <tr><td><strong>NOC Operations Lead</strong></td><td>Director, Global NOC</td><td>ASTRO Southeast alert · P1 MTTR trending up this week</td><td><span class="tag tag-amber">Unblock</span></td></tr>
+        <tr><td><strong>ActiveEye Cyber Lead</strong></td><td>Director, MDR Operations</td><td>Autonomous response pilot expansion — approval needed</td><td><span class="tag tag-blue">Collaborate</span></td></tr>
+        <tr><td><strong>Customer Success PMO</strong></td><td>VP, Customer Success</td><td>Q3 renewal contracts — SLA performance data due today</td><td><span class="tag tag-red">Due Today</span></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+  <div class="footer-note">This is a vision of what your morning could look like — every network signal, every SLA flag, every runbook gap surfaced automatically by Glean's Work AI platform. No more hunting across SharePoint, Teams, and email during a P1 on a mission-critical public safety network. Just ask. · Illustrative dashboard · Motorola Solutions Managed & Support Services · May 2026</div>
+</div>
+<script>
+var latChart=echarts.init(document.getElementById('latencyChart'),null,{renderer:'svg'});
+latChart.setOption({tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},legend:{bottom:0,textStyle:{fontSize:10,color:'#86868b'},itemWidth:12,itemHeight:8},grid:{left:40,right:16,top:16,bottom:40},xAxis:{type:'category',data:['W1 Feb','W2 Feb','W3 Feb','W4 Feb','W1 Mar','W2 Mar','W3 Mar','W4 Mar','W1 Apr','W2 Apr','W3 Apr','W4 Apr'],axisLabel:{fontSize:9,color:'#86868b'},axisLine:{lineStyle:{color:'#e8e8ed'}}},yAxis:{type:'value',axisLabel:{fontSize:10,color:'#86868b'},splitLine:{lineStyle:{color:'#f0f0f2'}},axisLine:{show:false}},series:[{name:'Network / ASTRO',type:'bar',stack:'inc',barWidth:18,data:[14,16,13,15,14,12,13,11,12,11,10,9],itemStyle:{color:'#005293'}},{name:'Field Service',type:'bar',stack:'inc',barWidth:18,data:[9,10,11,9,10,9,8,9,8,9,8,7],itemStyle:{color:'#0072CE'}},{name:'Cybersecurity',type:'bar',stack:'inc',barWidth:18,data:[3,4,3,4,3,3,4,3,4,3,4,4],itemStyle:{color:'#ff9f0a'}},{name:'P1 Critical',type:'bar',stack:'inc',barWidth:18,data:[2,3,2,2,2,2,1,2,1,1,1,1],itemStyle:{color:'#ff3b30',borderRadius:[4,4,0,0]}}]});
+var bwChart=echarts.init(document.getElementById('bandwidthChart'),null,{renderer:'svg'});
+bwChart.setOption({tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},grid:{left:170,right:20,top:10,bottom:10},xAxis:{type:'value',max:600,axisLabel:{formatter:'${value}M',fontSize:10,color:'#86868b'},splitLine:{lineStyle:{color:'#f0f0f2'}},axisLine:{show:false}},yAxis:{type:'category',data:['Device Management','AI Assist Suite','ActiveEye MDR','Field Services','ASTRO Managed LMR','Federal / Public Safety'].reverse(),axisLabel:{fontSize:11,color:'#333'},axisLine:{lineStyle:{color:'#e8e8ed'}}},series:[{type:'bar',barWidth:18,data:[{value:148,itemStyle:{color:'#d2d2d7',borderRadius:[0,4,4,0]}},{value:194,itemStyle:{color:'#0072CE',borderRadius:[0,4,4,0]}},{value:238,itemStyle:{color:'#0072CE',borderRadius:[0,4,4,0]}},{value:312,itemStyle:{color:'#005293',borderRadius:[0,4,4,0]}},{value:428,itemStyle:{color:'#34c759',borderRadius:[0,4,4,0]}},{value:541,itemStyle:{color:'#34c759',borderRadius:[0,4,4,0]}}],label:{show:true,position:'right',formatter:'${c}M',fontSize:11,fontWeight:600,color:'#1d1d1f'}}]});
+var secRadar=echarts.init(document.getElementById('securityRadar'),null,{renderer:'svg'});
+secRadar.setOption({tooltip:{},radar:{indicator:[{name:'NOC\nOperations',max:10},{name:'Cybersecurity\n(MDR)',max:10},{name:'AI &\nAutomation',max:10},{name:'Knowledge\nManagement',max:10},{name:'SLA\nDelivery',max:10},{name:'Field\nServices',max:10}],shape:'circle',splitArea:{areaStyle:{color:['rgba(0,82,147,0.02)','rgba(0,82,147,0.04)']}},axisLine:{lineStyle:{color:'#d2d2d7'}},splitLine:{lineStyle:{color:'#e8e8ed'}}},series:[{type:'radar',data:[{value:[9,8,7,3,9,8],name:'Current',areaStyle:{color:'rgba(0,82,147,0.12)'},lineStyle:{color:'#005293',width:2},itemStyle:{color:'#005293'}},{value:[10,10,10,10,10,10],name:'MSS Target',lineStyle:{color:'#d2d2d7',width:1,type:'dashed'},itemStyle:{color:'#d2d2d7'},areaStyle:{opacity:0}}]}]});
+var revChart=echarts.init(document.getElementById('revenueChart'),null,{renderer:'svg'});
+revChart.setOption({tooltip:{trigger:'axis',formatter:function(p){return p[0].name+': '+p[0].value+'%'}},grid:{left:56,right:16,top:16,bottom:36},xAxis:{type:'category',data:["Q1'24","Q2'24","Q3'24","Q4'24","Q1'25","Q2'25","Q3'25","Q4'25","Q1'26"],axisLabel:{fontSize:10,color:'#86868b'},axisLine:{lineStyle:{color:'#e8e8ed'}}},yAxis:{type:'value',min:99.5,max:100,axisLabel:{formatter:'{value}%',fontSize:10,color:'#86868b'},splitLine:{lineStyle:{color:'#f0f0f2'}},axisLine:{show:false}},series:[{type:'line',smooth:true,lineStyle:{color:'#005293',width:2.5},areaStyle:{color:'rgba(0,82,147,0.08)'},itemStyle:{color:'#005293'},symbolSize:5,data:[99.74,99.79,99.83,99.84,99.86,99.88,99.89,99.90,99.91],markLine:{data:[{yAxis:99.95,name:'SLA Target'}],lineStyle:{color:'#ff9f0a',type:'dashed'},label:{formatter:'SLA 99.95%',color:'#ff9f0a',fontSize:10}}}]});
+var threatChart=echarts.init(document.getElementById('threatChart'),null,{renderer:'svg'});
+threatChart.setOption({tooltip:{trigger:'axis'},legend:{bottom:0,textStyle:{fontSize:10,color:'#86868b'},itemWidth:12,itemHeight:8},grid:{left:50,right:16,top:16,bottom:40},xAxis:{type:'category',data:['W1 Feb','W2 Feb','W3 Feb','W4 Feb','W1 Mar','W2 Mar','W3 Mar','W4 Mar','W1 Apr','W2 Apr','W3 Apr','W4 Apr'],axisLabel:{fontSize:9,color:'#86868b'},axisLine:{lineStyle:{color:'#e8e8ed'}}},yAxis:{type:'value',axisLabel:{fontSize:10,color:'#86868b'},splitLine:{lineStyle:{color:'#f0f0f2'}},axisLine:{show:false}},series:[{name:'P2/P3 Incidents',type:'bar',stack:'total',barWidth:18,data:[20,23,21,22,20,19,18,17,16,15,14,13],itemStyle:{color:'#005293'}},{name:'P1 Critical',type:'bar',stack:'total',barWidth:18,data:[2,3,2,2,2,2,1,2,1,1,1,1],itemStyle:{color:'#ff3b30',borderRadius:[4,4,0,0]}},{name:'Cyber Flags',type:'bar',stack:'total',barWidth:18,data:[2,2,3,2,3,2,3,2,3,2,3,3],itemStyle:{color:'#ff9f0a',borderRadius:[4,4,0,0]}}]});
+var deflChart=echarts.init(document.getElementById('deflectionChart'),null,{renderer:'svg'});
+deflChart.setOption({tooltip:{trigger:'axis',formatter:function(p){return p[0].name+': '+p[0].value+'% adoption'}},grid:{left:50,right:16,top:16,bottom:36},xAxis:{type:'category',data:["Q3'24","Q4'24","Q1'25","Q2'25","Q3'25","Q4'25","Q1'26","Q2'26 YTD"],axisLabel:{fontSize:10,color:'#86868b'},axisLine:{lineStyle:{color:'#e8e8ed'}}},yAxis:{type:'value',min:0,max:100,axisLabel:{formatter:'{value}%',fontSize:10,color:'#86868b'},splitLine:{lineStyle:{color:'#f0f0f2'}},axisLine:{show:false}},series:[{type:'bar',barWidth:28,data:[{value:14,itemStyle:{color:'#d2d2d7',borderRadius:[4,4,0,0]}},{value:22,itemStyle:{color:'#d2d2d7',borderRadius:[4,4,0,0]}},{value:31,itemStyle:{color:'#d2d2d7',borderRadius:[4,4,0,0]}},{value:40,itemStyle:{color:'#d2d2d7',borderRadius:[4,4,0,0]}},{value:50,itemStyle:{color:'#d2d2d7',borderRadius:[4,4,0,0]}},{value:58,itemStyle:{color:'#d2d2d7',borderRadius:[4,4,0,0]}},{value:63,itemStyle:{color:'#d2d2d7',borderRadius:[4,4,0,0]}},{value:68,itemStyle:{color:'#005293',borderRadius:[4,4,0,0]}}],markLine:{data:[{yAxis:80,name:'FY26 Target'}],lineStyle:{color:'#ff9f0a',type:'dashed'},label:{formatter:'Target 80%',color:'#ff9f0a',fontSize:10}}}]});
+var cloudCostChart=echarts.init(document.getElementById('cloudCostChart'),null,{renderer:'svg'});
+cloudCostChart.setOption({tooltip:{trigger:'axis',axisPointer:{type:'cross'},formatter:function(p){var total=p.reduce(function(a,b){return a+b.value},0);return p[0].name+'<br>'+p.map(function(s){return s.marker+s.seriesName+': $'+s.value+'M'}).join('<br>')+'<br><b>Total: $'+total+'M</b>';}},legend:{bottom:0,textStyle:{fontSize:10,color:'#86868b'},itemWidth:12,itemHeight:8},grid:{left:50,right:16,top:16,bottom:40},xAxis:{type:'category',data:["Q1'24","Q2'24","Q3'24","Q4'24","Q1'25","Q2'25","Q3'25","Q4'25","Q1'26"],axisLabel:{fontSize:10,color:'#86868b'},axisLine:{lineStyle:{color:'#e8e8ed'}}},yAxis:{type:'value',axisLabel:{formatter:'${value}M',fontSize:10,color:'#86868b'},splitLine:{lineStyle:{color:'#f0f0f2'}},axisLine:{show:false}},series:[{name:'ASTRO / LMR',type:'line',stack:'rev',smooth:true,data:[310,318,325,330,338,345,352,360,368],areaStyle:{color:'rgba(0,82,147,0.55)'},lineStyle:{color:'#005293',width:1.5},itemStyle:{color:'#005293'},symbolSize:3},{name:'Field Services',type:'line',stack:'rev',smooth:true,data:[180,185,190,194,198,204,210,216,221],areaStyle:{color:'rgba(0,114,206,0.5)'},lineStyle:{color:'#0072CE',width:1.5},itemStyle:{color:'#0072CE'},symbolSize:3},{name:'ActiveEye MDR',type:'line',stack:'rev',smooth:true,data:[60,68,78,90,104,118,134,152,168],areaStyle:{color:'rgba(52,199,89,0.45)'},lineStyle:{color:'#34c759',width:1.5},itemStyle:{color:'#34c759'},symbolSize:3},{name:'AI Assist Suite',type:'line',stack:'rev',smooth:true,data:[20,28,38,50,64,80,98,118,138],areaStyle:{color:'rgba(88,86,214,0.4)'},lineStyle:{color:'#5856d6',width:1.5},itemStyle:{color:'#5856d6'},symbolSize:3}]});
+var budgetActualChart=echarts.init(document.getElementById('budgetActualChart'),null,{renderer:'svg'});
+budgetActualChart.setOption({tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+'<br>'+p.map(function(s){return s.marker+s.seriesName+': $'+s.value+'M'}).join('<br>');}},legend:{bottom:0,textStyle:{fontSize:10,color:'#86868b'},itemWidth:12,itemHeight:8},grid:{left:50,right:16,top:16,bottom:40},xAxis:{type:'category',data:["Q1'26","Q2'26 YTD","Q3'26 Plan","Q4'26 Plan"],axisLabel:{fontSize:11,color:'#333'},axisLine:{lineStyle:{color:'#e8e8ed'}}},yAxis:{type:'value',min:80,max:140,axisLabel:{formatter:'${value}M',fontSize:10,color:'#86868b'},splitLine:{lineStyle:{color:'#f0f0f2'}},axisLine:{show:false}},series:[{name:'Budget',type:'bar',barWidth:20,barGap:'20%',data:[{value:118,itemStyle:{color:'#d2d2d7',borderRadius:[4,4,0,0]}},{value:122,itemStyle:{color:'#d2d2d7',borderRadius:[4,4,0,0]}},{value:126,itemStyle:{color:'#d2d2d7',borderRadius:[4,4,0,0]}},{value:130,itemStyle:{color:'#d2d2d7',borderRadius:[4,4,0,0]}}],label:{show:true,position:'top',formatter:'${c}M',fontSize:10,color:'#86868b'}},{name:'Actual / Forecast',type:'bar',barWidth:20,data:[{value:114,itemStyle:{color:'#34c759',borderRadius:[4,4,0,0]}},{value:119,itemStyle:{color:'#005293',borderRadius:[4,4,0,0]}},{value:124,itemStyle:{color:'#0072CE',borderRadius:[4,4,0,0]}},{value:127,itemStyle:{color:'#0072CE',borderRadius:[4,4,0,0]}}],label:{show:true,position:'top',formatter:'${c}M',fontSize:10,fontWeight:600,color:'#1d1d1f'}}]});
+window.addEventListener('resize',function(){latChart.resize();bwChart.resize();secRadar.resize();revChart.resize();deflChart.resize();threatChart.resize();cloudCostChart.resize();budgetActualChart.resize();});
+</script>
+</body>
+</html>
